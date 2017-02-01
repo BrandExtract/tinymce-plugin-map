@@ -1,10 +1,10 @@
-# Google Maps plugin for TinyMCE 4
+# Maps plugin for TinyMCE 4
 
-Embed a Google map into the content.
+Embed a static map into the content.
 
 ## Installation
 
-* `bower|npm` `install https://github.com/sntran/tinymce-plugin-gmaps.git --save`
+* `bower|npm` `install https://github.com/sntran/tinymce-plugin-maps.git --save`
 * Move to `tinymce/plugins` folder through build scripts.
 
 ## Configuration
@@ -14,9 +14,9 @@ Embed a Google map into the content.
 tinymce.init({
     selector: "textarea",
     plugins: [
-            "image gmaps"
+            "image maps"
             ],
-    toolbar: "image gmaps",
+    toolbar: "image maps",
     extended_valid_elements: "+iframe[src|width|height|name|align|class]",
     });
 </script>

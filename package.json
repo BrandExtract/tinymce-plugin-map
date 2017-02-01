@@ -1,14 +1,14 @@
 {
-  "name": "tinymce-plugin-gmaps",
-  "version": "0.1.0",
-  "description": "A TinyMCE plugin to insert a Google map",
+  "name": "tinymce-plugin-maps",
+  "version": "0.2.0",
+  "description": "A TinyMCE plugin to insert a map",
   "main": "plugin.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/sntran/tinymce-plugin-gmaps.git"
+    "url": "git+https://github.com/sntran/tinymce-plugin-maps.git"
   },
   "keywords": [
     "TinyMCE",
@@ -19,7 +19,7 @@
   "author": "Son Tran-Nguyen",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/sntran/tinymce-plugin-gmaps/issues"
+    "url": "https://github.com/sntran/tinymce-plugin-maps/issues"
   },
-  "homepage": "https://github.com/sntran/tinymce-plugin-gmaps#readme"
+  "homepage": "https://github.com/sntran/tinymce-plugin-maps#readme"
 }
