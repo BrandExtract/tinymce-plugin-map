@@ -299,14 +299,20 @@
 
   Plugin.prototype.render = function(event) {
     var data = this.data || {}, html = buildMap(data, true);
+    var win = this.window;
 
-    if (this.window) {
-      this.window.find('*').each(function(ctrl) {
+    if (win) {
+      win.find('*').each(function(ctrl) {
         data[ctrl.name()] = ctrl.value();
       });
       this.data = data;
       html = buildMap(data, true);
-      this.window.find('#map')[0].getEl().innerHTML = html;
+      var mapCtrl = win.find('#map')[0];
+      mapCtrl.innerHtml(html).updateLayoutRect();
+      
+      mapCtrl.parentsAndSelf().each(function(ctrl) {
+        ctrl.reflow()
+      });
     }
 
     return html;
