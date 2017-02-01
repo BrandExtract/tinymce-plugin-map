@@ -241,6 +241,9 @@
           params.width = dom.getAttrib(imgElm, 'width');
           params.height = dom.getAttrib(imgElm, 'height');
         }
+
+        if (!params.width) params.width = 400;
+        if (!params.height) params.height = 300;
         
         // Open dialog window
         plugin.showDialog();
