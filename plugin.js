@@ -1,17 +1,23 @@
 (function() {
   tinymce.PluginManager.requireLangPack('maps');
-  
-  var SERVICES = {
-    Google: '//maps.googleapis.com/maps/api/staticmap?'
+
+  var SERVICES = ['google_staticmap', 'google_embed'];
+  SERVICES['google_staticmap'] = {
+    name: 'Google Static Map',
+    api: '//maps.googleapis.com/maps/api/staticmap?',
+    type: 'img'
   };
+  SERVICES['google_embed'] = {
+    name: 'Google Embed Map',
+    api: '//www.google.com/maps/embed/v1/place?',
+    type: 'iframe'
+  }
   
-  function buildURL(params) {
-    var url = SERVICES[params.service || 'Google'];
-    
+  function buildURL(url, params) {
     var key, value, pairs = [];
     for (key in params) {
       value = params[key];
-      if (key !== 'service' && value) {
+      if (value) {
         pairs.push(key + '=' + value);
       }
     }
@@ -51,6 +57,12 @@
   };
   
   function buildMap(data, useInlineStyle) {
+    var service = SERVICES[data.service || 'google_staticmap'];
+    if (!service) return '';
+    var type = service.type;
+    // So the service name is not built into the URL.
+    delete data.service;
+
     data.size = data.width + 'x' + data.height;
     if (data.scale) {
       data.scale = 2;
@@ -59,12 +71,30 @@
     if (data.markers) {
       data.markers = 'color:blue|' + data.center;
     }
-    var html = buildURL(data);
-    html = '<img src="' + html + '"';
-    html += ' width="' + data.width + '" height="' + data.height + '"';
-    html += ' alt="Map of ' + data.center + '" title="' + data.center + '"';
+
+    var width = data.width, height = data.height, location = data.center;
+
+    if (type === 'iframe') {
+      data.q = data.center;
+      delete data.center;
+      delete data.markers;
+      delete data.width;
+      delete data.height;
+      delete data.size;
+      delete data.format;
+    }
+
+    // If no key is provided, try to use key in setting if any.
+    if (!data.key) {
+      data.key = service.key || '';
+    }
+
+    var html = buildURL(service.api, data);
+    html = '<' + type + ' src="' + html + '"';
+    html += ' width="' + width + '" height="' + height + '"';
+    html += ' alt="Map of ' + location + '" title="' + location + '"';
     if (useInlineStyle) {
-      html += ' style="width: ' + data.width + 'px; height: ' + data.height + 'px;"';
+      html += ' style="width: ' + width + 'px; height: ' + height + 'px;"';
     }
     html += ' />';
     return html;
@@ -74,6 +104,12 @@
   function Plugin(editor, url) {
     this.editor = editor;
     this.url = url;
+    
+    // Map default API key in settings for each services.
+    SERVICES.forEach(function(service) {
+      var name = service.name;
+      service.key = editor.settings[name + '_api_key'] || '';
+    });
 
     var render = this.render.bind(this);
     
@@ -86,15 +122,22 @@
         tooltip: 'Available: Google.',
         maxLength: 4,
         size: 2,
-        values: ['Google'].map(function(level) {
-          return { text: level, value: level }
+        values: SERVICES.map(function(service) {
+          return { text: SERVICES[service].name, value: service }
         }),
+        onselect: render
+      },
+      {
+        type: 'textbox', 
+        name: 'key', 
+        label: 'API Key',
+        required: true,
         onchange: render
       },
       {
         type: 'textbox', 
         name: 'center', 
-        label: 'Center', 
+        label: 'Location', 
         tooltip: 'This parameter takes a location as either a comma-separated {latitude,longitude} pair (e.g. "40.714728,-73.998672") or a string address (e.g. "city hall, new york, ny") identifying a unique location on the face of the earth',
         required: true,
         onchange: render
@@ -148,7 +191,7 @@
             subtype: 'number', 
             maxLength: 5, 
             size: 3, 
-            min: 100, 
+            min: 200, 
             max: 640,
             required: true,
             ariaLabel: 'Width',
@@ -161,7 +204,7 @@
             subtype: 'number', 
             maxLength: 5, 
             size: 3, 
-            min: 100,
+            min: 200,
             max: 640,
             required: true,
             ariaLabel: 'Height',
@@ -185,7 +228,7 @@
         tooltip: 'The map type to display. Default to roadmap.',
         maxLength: 4,
         size: 2,
-        values: ['roadmap', 'satellite', 'hybrid', 'terrain'].map(function(level) {
+        values: ['roadmap', 'satellite' /*, 'hybrid', 'terrain'*/].map(function(level) {
           return { text: level, value: level }
         }),
         onselect: render
@@ -197,6 +240,7 @@
         ariaLabel: 'Style',
         tooltip: 'Custom style to alter the presentation of a specific feature (roads, parks, and other features) of the map',
         multiline: true,
+        rows: 3,
         onchange: render
       },
       {
@@ -219,27 +263,57 @@
   
   Plugin.prototype.init = function(editor, url) {
     var plugin = this, generalItems = plugin.generalItems;
+
+    var stateSelector = SERVICES.map(function(name) {
+      var service = SERVICES[name];
+      var selector = service.type + '[src*="' + service.api + '"]';
+      if (service.type === 'iframe') {
+        // After inserting an iframe, TinyMCE wraps it with a span to handle clicks.
+        // So we need to add a selector for it too.
+        selector += ',' + '[data-mce-p-src*="' + service.api + '"]';
+      }
+      return selector;
+    }).join(',');
+
     // Add a button that opens a window
     editor.addButton('maps', {
       image: url + '/img/icons/map.svg',
       tooltip: 'Insert/edit map',
-      stateSelector: 'img[src*="maps.googleapis.com/maps"]',
+      stateSelector: stateSelector,
       onclick: function() {
-        var dom = editor.dom, imgElm;
+        var dom = editor.dom, mapElement;
         var src = '';
         
         // Parse the current map source for values to insert into
         // the dialog inputs.
-        var imgElm = editor.selection.getNode();
-        if (imgElm) {
-          src = dom.getAttrib(imgElm, 'src')
+        var mapElement = editor.selection.getNode();
+        
+        if (mapElement) {
+          src = dom.getAttrib(mapElement, 'src');
+          if (!src) {
+            src = dom.getAttrib(mapElement, 'data-mce-p-src');
+          }
           var uri = parseUri(src);
           var params;
           if (uri.queryKey) {
             params = plugin.data = uri.queryKey;
           }
-          params.width = dom.getAttrib(imgElm, 'width');
-          params.height = dom.getAttrib(imgElm, 'height');
+
+          if (!params.center) {
+            // The selection is an embed iframe map with `q` instead of `center`.
+            params.center = params.q || '';
+          }
+
+          params.service = 'google_staticmap';
+          SERVICES.forEach(function(name) {
+            var service = SERVICES[name];
+            if (src.indexOf(service.api) > -1) {
+              params.service = name;
+            }
+          });
+
+          params.width = dom.getAttrib(mapElement, 'width');
+          params.height = dom.getAttrib(mapElement, 'height');
         }
 
         if (!params.width) params.width = 400;
@@ -281,13 +355,15 @@
             {
               type: 'container',
               name: 'map',
-              html: this.render()
+              html: ''
             }
           ]
         }
       ],
       onsubmit: this.onsubmit.bind(this)
     });
+
+    this.render();
   }
   
   Plugin.prototype.onsubmit = function(event) {
@@ -325,9 +401,9 @@
     getInfo: function () {
       return {
         longname: 'Maps - Fully customizable maps for your content.',
-        author: 'Son Tran-Nguyen',
+        author: 'BrandExtract',
         authorurl: 'http://www.brandextract.com',
-        version: '0.2.0'
+        version: '0.3.0'
       };
     }
   });
