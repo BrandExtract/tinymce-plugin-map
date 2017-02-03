@@ -101,7 +101,9 @@
     var html = buildURL(service.api, data)
     html = '<' + type + ' src="' + html + '"'
     html += ' width="' + width + '" height="' + height + '"'
-    html += ' alt="Map of ' + location + '" title="' + location + '"'
+    if (type === 'img') {
+      html += ' alt="Map of ' + location + '" title="' + location + '"'
+    }
     if (useInlineStyle) {
       html += ' style="width: ' + width + 'px; height: ' + height + 'px;"'
     }
@@ -338,6 +340,10 @@
           btn
         })
       }
+    })
+
+    editor.addCommand('beInsertMap', function (ui, value, args) {
+      editor.insertContent(buildMap(args))
     })
   }
 
