@@ -1,143 +1,152 @@
-(function() {
-  tinymce.PluginManager.requireLangPack('maps');
+(function (tinymce) {
+  'use strict'
 
-  var SERVICES = ['google_staticmap', 'google_embed'];
+  tinymce.PluginManager.requireLangPack('maps')
+
+  var SERVICES = ['google_staticmap', 'google_embed']
   SERVICES['google_staticmap'] = {
     name: 'Google Static Map',
     api: '//maps.googleapis.com/maps/api/staticmap?',
     type: 'img'
-  };
+  }
   SERVICES['google_embed'] = {
     name: 'Google Embed Map',
     api: '//www.google.com/maps/embed/v1/place?',
     type: 'iframe'
   }
-  
-  function buildURL(url, params) {
-    var key, value, pairs = [];
+
+  function buildURL (url, params) {
+    var key
+    var value
+    var pairs = []
+
     for (key in params) {
-      value = params[key];
+      value = params[key]
       if (value) {
-        pairs.push(key + '=' + value);
+        pairs.push(key + '=' + value)
       }
     }
-    return url += pairs.join('&');
+    url += pairs.join('&')
+    return url
   }
-  
+
   // parseUri 1.2.2
   // (c) Steven Levithan <stevenlevithan.com>
   // MIT License
   function parseUri (str) {
-    var	o   = parseUri.options,
-      m   = o.parser[o.strictMode ? "strict" : "loose"].exec(str),
-      uri = {},
-      i   = 14;
-  
-    while (i--) uri[o.key[i]] = m[i] || "";
-  
-    uri[o.q.name] = {};
+    var o = parseUri.options
+    var m = o.parser[o.strictMode ? 'strict' : 'loose'].exec(str)
+    var uri = {}
+    var i = 14
+
+    while (i--) uri[o.key[i]] = m[i] || ''
+
+    uri[o.q.name] = {}
     uri[o.key[12]].replace(o.q.parser, function ($0, $1, $2) {
-      if ($1) uri[o.q.name][$1] = $2;
-    });
-  
-    return uri;
-  };
-  
+      if ($1) uri[o.q.name][$1] = $2
+    })
+
+    return uri
+  }
+
   parseUri.options = {
     strictMode: false,
-    key: ["source","protocol","authority","userInfo","user","password","host","port","relative","path","directory","file","query","anchor"],
-    q:   {
-      name:   "queryKey",
+    key: ['source', 'protocol', 'authority', 'userInfo', 'user', 'password', 'host', 'port', 'relative', 'path', 'directory', 'file', 'query', 'anchor'],
+    q: {
+      name: 'queryKey',
       parser: /(?:^|&)([^&=]*)=?([^&]*)/g
     },
     parser: {
       strict: /^(?:([^:\/?#]+):)?(?:\/\/((?:(([^:@]*)(?::([^:@]*))?)?@)?([^:\/?#]*)(?::(\d*))?))?((((?:[^?#\/]*\/)*)([^?#]*))(?:\?([^#]*))?(?:#(.*))?)/,
-      loose:  /^(?:(?![^:@]+:[^:@\/]*@)([^:\/?#.]+):)?(?:\/\/)?((?:(([^:@]*)(?::([^:@]*))?)?@)?([^:\/?#]*)(?::(\d*))?)(((\/(?:[^?#](?![^?#\/]*\.[^?#\/.]+(?:[?#]|$)))*\/?)?([^?#\/]*))(?:\?([^#]*))?(?:#(.*))?)/
+      loose: /^(?:(?![^:@]+:[^:@\/]*@)([^:\/?#.]+):)?(?:\/\/)?((?:(([^:@]*)(?::([^:@]*))?)?@)?([^:\/?#]*)(?::(\d*))?)(((\/(?:[^?#](?![^?#\/]*\.[^?#\/.]+(?:[?#]|$)))*\/?)?([^?#\/]*))(?:\?([^#]*))?(?:#(.*))?)/
     }
-  };
-  
-  function buildMap(data, useInlineStyle) {
-    var service = SERVICES[data.service || 'google_staticmap'];
-    if (!service) return '';
-    var type = service.type;
-    // So the service name is not built into the URL.
-    delete data.service;
+  }
 
-    data.size = data.width + 'x' + data.height;
+  function buildMap (data, useInlineStyle) {
+    var service = SERVICES[data.service || 'google_staticmap']
+    if (!service) return ''
+    var type = service.type
+    // So the service name is not built into the URL.
+    delete data.service
+
+    data.size = data.width + 'x' + data.height
     if (data.scale) {
-      data.scale = 2;
+      data.scale = 2
     }
 
     if (data.markers) {
-      data.markers = 'color:blue|' + data.center;
+      data.markers = 'color:blue|' + data.center
     }
 
-    var width = data.width, height = data.height, location = data.center;
+    var width = data.width
+    var height = data.height
+    var location = data.center || data.q
 
     if (type === 'iframe') {
-      data.q = data.center;
-      delete data.center;
-      delete data.markers;
-      delete data.width;
-      delete data.height;
-      delete data.size;
-      delete data.format;
+      data.q = data.center
+      delete data.center
+      delete data.markers
+      delete data.width
+      delete data.height
+      delete data.size
+      delete data.scale
+      delete data.format
     }
 
     // If no key is provided, try to use key in setting if any.
     if (!data.key) {
-      data.key = service.key || '';
+      data.key = service.key || ''
     }
 
-    var html = buildURL(service.api, data);
-    html = '<' + type + ' src="' + html + '"';
-    html += ' width="' + width + '" height="' + height + '"';
-    html += ' alt="Map of ' + location + '" title="' + location + '"';
+    var html = buildURL(service.api, data)
+    html = '<' + type + ' src="' + html + '"'
+    html += ' width="' + width + '" height="' + height + '"'
+    html += ' alt="Map of ' + location + '" title="' + location + '"'
     if (useInlineStyle) {
-      html += ' style="width: ' + width + 'px; height: ' + height + 'px;"';
+      html += ' style="width: ' + width + 'px; height: ' + height + 'px;"'
     }
-    html += ' />';
-    return html;
+    html += ' />'
+    return html
   }
-  
-  /* PLUGIN */
-  function Plugin(editor, url) {
-    this.editor = editor;
-    this.url = url;
-    
-    // Map default API key in settings for each services.
-    SERVICES.forEach(function(service) {
-      var name = service.name;
-      service.key = editor.settings[name + '_api_key'] || '';
-    });
 
-    var render = this.render.bind(this);
-    
+  /* PLUGIN */
+  function Plugin (editor, url) {
+    this.editor = editor
+    this.url = url
+
+    // Map default API key in settings for each services.
+    SERVICES.forEach(function (name) {
+      var service = SERVICES[name]
+      service.key = editor.settings[name + '_api_key'] || ''
+    })
+
+    var render = this.render.bind(this)
+
     this.generalItems = [
       {
-        type: 'listbox', 
-        name: 'service', 
+        type: 'listbox',
+        name: 'service',
         label: 'Map service',
         ariaLabel: 'Map service',
         tooltip: 'Available: Google.',
         maxLength: 4,
         size: 2,
-        values: SERVICES.map(function(service) {
+        values: SERVICES.map(function (service) {
           return { text: SERVICES[service].name, value: service }
         }),
         onselect: render
       },
       {
-        type: 'textbox', 
-        name: 'key', 
+        type: 'textbox',
+        name: 'key',
         label: 'API Key',
         required: true,
         onchange: render
       },
       {
-        type: 'textbox', 
-        name: 'center', 
-        label: 'Location', 
+        type: 'textbox',
+        name: 'center',
+        label: 'Location',
         tooltip: 'This parameter takes a location as either a comma-separated {latitude,longitude} pair (e.g. "40.714728,-73.998672") or a string address (e.g. "city hall, new york, ny") identifying a unique location on the face of the earth',
         required: true,
         onchange: render
@@ -153,7 +162,7 @@
           {
             type: 'listbox',
             subtype: 'number',
-            name: 'zoom', 
+            name: 'zoom',
             label: 'Zoom level',
             ariaLabel: 'Zoom',
             tooltip: 'This parameter takes a numerical value corresponding to the zoom level of the region desired',
@@ -162,13 +171,13 @@
             size: 2,
             min: 10,
             max: 20,
-            values: [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20].map(function(level) {
+            values: [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20].map(function (level) {
               return { text: level, value: level + '' }
             }),
             onselect: render
           },
           {
-            name: 'markers', 
+            name: 'markers',
             type: 'checkbox',
             text: 'Marker',
             required: true,
@@ -186,12 +195,12 @@
         spacing: 5,
         items: [
           {
-            name: 'width', 
-            type: 'textbox', 
-            subtype: 'number', 
-            maxLength: 5, 
-            size: 3, 
-            min: 200, 
+            name: 'width',
+            type: 'textbox',
+            subtype: 'number',
+            maxLength: 5,
+            size: 3,
+            min: 200,
             max: 640,
             required: true,
             ariaLabel: 'Width',
@@ -199,11 +208,11 @@
           },
           {type: 'label', text: 'x'},
           {
-            name: 'height', 
-            type: 'textbox', 
-            subtype: 'number', 
-            maxLength: 5, 
-            size: 3, 
+            name: 'height',
+            type: 'textbox',
+            subtype: 'number',
+            maxLength: 5,
+            size: 3,
             min: 200,
             max: 640,
             required: true,
@@ -211,7 +220,7 @@
             onchange: render
           },
           {
-            name: 'scale', 
+            name: 'scale',
             type: 'checkbox',
             text: 'Retina (2x)',
             required: true,
@@ -221,14 +230,14 @@
         ]
       },
       {
-        type: 'listbox', 
-        name: 'maptype', 
+        type: 'listbox',
+        name: 'maptype',
         label: 'Map type',
         ariaLabel: 'Map type',
         tooltip: 'The map type to display. Default to roadmap.',
         maxLength: 4,
         size: 2,
-        values: ['roadmap', 'satellite' /*, 'hybrid', 'terrain'*/].map(function(level) {
+        values: ['roadmap', 'satellite'].map(function (level) {
           return { text: level, value: level }
         }),
         onselect: render
@@ -244,97 +253,98 @@
         onchange: render
       },
       {
-        type: 'listbox', 
-        name: 'format', 
+        type: 'listbox',
+        name: 'format',
         label: 'Format',
         ariaLabel: 'Image Format',
         tooltip: 'JPEG typically provides greater compression, while GIF and PNG provide greater detail.',
         maxLength: 4,
         size: 2,
-        values: ['png8', 'png32', 'gif', 'jpg', 'jpg-baseline'].map(function(level) {
+        values: ['png8', 'png32', 'gif', 'jpg', 'jpg-baseline'].map(function (level) {
           return { text: level, value: level }
         }),
         onselect: render
-      },
-    ];
-    
-    this.init(editor, url);
-  }
-  
-  Plugin.prototype.init = function(editor, url) {
-    var plugin = this, generalItems = plugin.generalItems;
+      }
+    ]
 
-    var stateSelector = SERVICES.map(function(name) {
-      var service = SERVICES[name];
-      var selector = service.type + '[src*="' + service.api + '"]';
+    this.init(editor, url)
+  }
+
+  Plugin.prototype.init = function (editor, url) {
+    var plugin = this
+
+    var stateSelector = SERVICES.map(function (name) {
+      var service = SERVICES[name]
+      var selector = service.type + '[src*="' + service.api + '"]'
       if (service.type === 'iframe') {
         // After inserting an iframe, TinyMCE wraps it with a span to handle clicks.
         // So we need to add a selector for it too.
-        selector += ',' + '[data-mce-p-src*="' + service.api + '"]';
+        selector += ',' + '[data-mce-p-src*="' + service.api + '"]'
       }
-      return selector;
-    }).join(',');
+      return selector
+    }).join(',')
 
     // Add a button that opens a window
     editor.addButton('maps', {
       image: url + '/img/icons/map.svg',
       tooltip: 'Insert/edit map',
       stateSelector: stateSelector,
-      onclick: function() {
-        var dom = editor.dom, mapElement;
-        var src = '';
-        
+      onclick: function () {
+        var dom = editor.dom
+        var mapElement
+        var src = ''
+
         // Parse the current map source for values to insert into
         // the dialog inputs.
-        var mapElement = editor.selection.getNode();
-        
+        mapElement = editor.selection.getNode()
+
         if (mapElement) {
-          src = dom.getAttrib(mapElement, 'src');
+          src = dom.getAttrib(mapElement, 'src')
           if (!src) {
-            src = dom.getAttrib(mapElement, 'data-mce-p-src');
+            src = dom.getAttrib(mapElement, 'data-mce-p-src')
           }
-          var uri = parseUri(src);
-          var params;
+          var uri = parseUri(src)
+          var params
           if (uri.queryKey) {
-            params = plugin.data = uri.queryKey;
+            params = plugin.data = uri.queryKey
           }
 
           if (!params.center) {
             // The selection is an embed iframe map with `q` instead of `center`.
-            params.center = params.q || '';
+            params.center = params.q || ''
           }
 
-          params.service = 'google_staticmap';
-          SERVICES.forEach(function(name) {
-            var service = SERVICES[name];
+          params.service = 'google_staticmap'
+          SERVICES.forEach(function (name) {
+            var service = SERVICES[name]
             if (src.indexOf(service.api) > -1) {
-              params.service = name;
+              params.service = name
             }
-          });
+          })
 
-          params.width = dom.getAttrib(mapElement, 'width');
-          params.height = dom.getAttrib(mapElement, 'height');
+          params.width = dom.getAttrib(mapElement, 'width')
+          params.height = dom.getAttrib(mapElement, 'height')
         }
 
-        if (!params.width) params.width = 400;
-        if (!params.height) params.height = 300;
-        
+        if (!params.width) params.width = 400
+        if (!params.height) params.height = 300
+
         // Open dialog window
-        plugin.showDialog();
+        plugin.showDialog()
       },
-      onpostrender: function() {
-        var btn = this;
-        editor.on('NodeChange', function(e) {
-  
-        });
+      onpostrender: function () {
+        var btn = this
+        editor.on('NodeChange', function (e) {
+          btn
+        })
       }
-    });
+    })
   }
 
-  Plugin.prototype.showDialog = function() {
-    var data = this.data;
+  Plugin.prototype.showDialog = function () {
+    var data = this.data
     // Reset this so `.render` runs correctly.
-    this.window = null;
+    this.window = null
 
     this.window = this.editor.windowManager.open({
       title: 'Insert a map',
@@ -361,42 +371,43 @@
         }
       ],
       onsubmit: this.onsubmit.bind(this)
-    });
+    })
 
-    this.render();
+    this.render()
   }
-  
-  Plugin.prototype.onsubmit = function(event) {
-    var data = event.data;
+
+  Plugin.prototype.onsubmit = function (event) {
+    var data = event.data
     // Insert content when the window form is submitted
-    data = tinymce.extend(data, {});
-    this.editor.insertContent(buildMap(data));
+    data = tinymce.extend(data, {})
+    this.editor.insertContent(buildMap(data))
   }
 
-  Plugin.prototype.render = function(event) {
-    var data = this.data || {}, html = buildMap(data, true);
-    var win = this.window;
+  Plugin.prototype.render = function (event) {
+    var data = this.data || {}
+    var html = buildMap(data, true)
+    var win = this.window
 
     if (win) {
-      win.find('*').each(function(ctrl) {
-        data[ctrl.name()] = ctrl.value();
-      });
-      this.data = data;
-      html = buildMap(data, true);
-      var mapCtrl = win.find('#map')[0];
-      mapCtrl.innerHtml(html).updateLayoutRect();
-      
-      mapCtrl.parentsAndSelf().each(function(ctrl) {
+      win.find('*').each(function (ctrl) {
+        data[ctrl.name()] = ctrl.value()
+      })
+      this.data = data
+      html = buildMap(data, true)
+      var mapCtrl = win.find('#map')[0]
+      mapCtrl.innerHtml(html).updateLayoutRect()
+
+      mapCtrl.parentsAndSelf().each(function (ctrl) {
         ctrl.reflow()
-      });
+      })
     }
 
-    return html;
+    return html
   }
-  
+
   tinymce.create('tinymce.plugins.Maps', {
-    init: function(editor, url) {
-      new Plugin(editor, url);
+    init: function (editor, url) {
+      return new Plugin(editor, url)
     },
     getInfo: function () {
       return {
@@ -404,10 +415,10 @@
         author: 'BrandExtract',
         authorurl: 'http://www.brandextract.com',
         version: '0.3.0'
-      };
+      }
     }
-  });
-  
+  })
+
   // Register plugin
-  tinymce.PluginManager.add('maps', tinymce.plugins.Maps);
-})();
+  tinymce.PluginManager.add('maps', tinymce.plugins.Maps)
+})(window.tinymce)
