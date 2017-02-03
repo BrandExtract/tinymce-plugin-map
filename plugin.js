@@ -1,7 +1,7 @@
 (function (tinymce) {
   'use strict'
 
-  tinymce.PluginManager.requireLangPack('maps')
+  tinymce.PluginManager.requireLangPack('map')
 
   var SERVICES = ['google_staticmap', 'google_embed']
   SERVICES['google_staticmap'] = {
@@ -287,7 +287,7 @@
     }).join(',')
 
     // Add a button that opens a window
-    editor.addButton('maps', {
+    editor.addButton('map', {
       image: url + '/img/icons/map.svg',
       tooltip: 'Insert/edit map',
       stateSelector: stateSelector,
@@ -411,13 +411,13 @@
     return html
   }
 
-  tinymce.create('tinymce.plugins.Maps', {
+  tinymce.create('tinymce.plugins.Map', {
     init: function (editor, url) {
       return new Plugin(editor, url)
     },
     getInfo: function () {
       return {
-        longname: 'Maps - Fully customizable maps for your content.',
+        longname: 'Map - Fully customizable map for your content.',
         author: 'BrandExtract',
         authorurl: 'http://www.brandextract.com',
         version: '0.3.0'
@@ -426,5 +426,5 @@
   })
 
   // Register plugin
-  tinymce.PluginManager.add('maps', tinymce.plugins.Maps)
+  tinymce.PluginManager.add('map', tinymce.plugins.Map)
 })(window.tinymce)

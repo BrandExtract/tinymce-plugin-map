@@ -1,5 +1,5 @@
 {
-  "name": "tinymce-plugin-maps",
+  "name": "tinymce-plugin-map",
   "version": "0.3.0",
   "description": "A TinyMCE plugin to insert a map",
   "main": "plugin.js",
@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/BrandExtract/tinymce-plugin-maps.git"
+    "url": "git+https://github.com/BrandExtract/tinymce-plugin-map.git"
   },
   "keywords": [
     "TinyMCE",
@@ -16,10 +16,10 @@
     "Google",
     "Maps"
   ],
-  "author": "Son Tran-Nguyen",
+  "author": "BrandExtract",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/BrandExtract/tinymce-plugin-maps/issues"
+    "url": "https://github.com/BrandExtract/tinymce-plugin-map/issues"
   },
-  "homepage": "https://github.com/BrandExtract/tinymce-plugin-maps#readme"
+  "homepage": "https://github.com/BrandExtract/tinymce-plugin-map#readme"
 }
