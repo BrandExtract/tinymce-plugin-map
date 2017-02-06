@@ -317,10 +317,7 @@
     var editor = this.editor
     var dom = editor.dom
     var mapElement
-    var params = this.data = {
-      width: 400,
-      height: 300
-    }
+    var params = this.data = {}
 
     // Parse the current map source for values to insert into
     // the dialog inputs.
@@ -352,6 +349,9 @@
       params.width = dom.getAttrib(mapElement, 'width')
       params.height = dom.getAttrib(mapElement, 'height')
     }
+
+    if (!params.width) params.width = 400
+    if (!params.height) params.height = 300
 
     // Reset this so `.render` runs correctly.
     this.window = null
