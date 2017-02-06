@@ -269,6 +269,7 @@
       }
     ]
 
+    this.showDialog = this.showDialog.bind(this)
     this.init(editor, url)
   }
 
@@ -291,49 +292,7 @@
       image: url + '/img/icons/map.svg',
       tooltip: 'Insert/edit map',
       stateSelector: stateSelector,
-      onclick: function () {
-        var dom = editor.dom
-        var mapElement
-        var src = ''
-
-        // Parse the current map source for values to insert into
-        // the dialog inputs.
-        mapElement = editor.selection.getNode()
-
-        if (mapElement) {
-          src = dom.getAttrib(mapElement, 'src')
-          if (!src) {
-            src = dom.getAttrib(mapElement, 'data-mce-p-src')
-          }
-          var uri = parseUri(src)
-          var params
-          if (uri.queryKey) {
-            params = plugin.data = uri.queryKey
-          }
-
-          if (!params.center) {
-            // The selection is an embed iframe map with `q` instead of `center`.
-            params.center = params.q || ''
-          }
-
-          params.service = 'google_staticmap'
-          SERVICES.forEach(function (name) {
-            var service = SERVICES[name]
-            if (src.indexOf(service.api) > -1) {
-              params.service = name
-            }
-          })
-
-          params.width = dom.getAttrib(mapElement, 'width')
-          params.height = dom.getAttrib(mapElement, 'height')
-        }
-
-        if (!params.width) params.width = 400
-        if (!params.height) params.height = 300
-
-        // Open dialog window
-        plugin.showDialog()
-      },
+      onclick: plugin.showDialog,
       onpostrender: function () {
         var btn = this
         editor.on('NodeChange', function (e) {
@@ -345,16 +304,61 @@
     editor.addCommand('beInsertMap', function (ui, value, args) {
       editor.insertContent(buildMap(args))
     })
+
+    editor.addMenuItem('map', {
+      image: url + '/img/icons/map.svg',
+      text: 'Map',
+      onclick: plugin.showDialog,
+      context: 'insert'
+    })
   }
 
   Plugin.prototype.showDialog = function () {
-    var data = this.data
+    var editor = this.editor
+    var dom = editor.dom
+    var mapElement
+    var params = this.data = {
+      width: 400,
+      height: 300
+    }
+
+    // Parse the current map source for values to insert into
+    // the dialog inputs.
+    mapElement = editor.selection.getNode()
+
+    if (mapElement) {
+      var src = dom.getAttrib(mapElement, 'src')
+      if (!src) {
+        src = dom.getAttrib(mapElement, 'data-mce-p-src')
+      }
+      var uri = parseUri(src)
+      if (uri.queryKey) {
+        params = this.data = uri.queryKey
+      }
+
+      if (!params.center) {
+        // The selection is an embed iframe map with `q` instead of `center`.
+        params.center = params.q || ''
+      }
+
+      params.service = 'google_staticmap'
+      SERVICES.forEach(function (name) {
+        var service = SERVICES[name]
+        if (src.indexOf(service.api) > -1) {
+          params.service = name
+        }
+      })
+
+      params.width = dom.getAttrib(mapElement, 'width')
+      params.height = dom.getAttrib(mapElement, 'height')
+    }
+
     // Reset this so `.render` runs correctly.
     this.window = null
 
     this.window = this.editor.windowManager.open({
       title: 'Insert a map',
-      data: data,
+      data: params,
       body: [
         {
           type: 'container',
