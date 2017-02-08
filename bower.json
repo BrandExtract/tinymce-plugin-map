@@ -1,0 +1,23 @@
+{
+  "name": "tinymce-plugin-map",
+  "description": "A TinyMCE plugin to insert a map",
+  "main": "plugin.js",
+  "authors": [
+    "BrandExtract"
+  ],
+  "license": "ISC",
+  "keywords": [
+    "TinyMCE",
+    "plugin",
+    "Google",
+    "Maps"
+  ],
+  "homepage": "https://github.com/BrandExtract/tinymce-plugin-map",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
