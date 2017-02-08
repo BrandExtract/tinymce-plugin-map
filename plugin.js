@@ -69,7 +69,10 @@
     // So the service name is not built into the URL.
     delete data.service
 
-    data.size = data.width + 'x' + data.height
+    var width = data.width
+    var height = data.height
+
+    data.size = width + 'x' + height
     if (data.scale) {
       data.scale = 2
     }
@@ -77,9 +80,6 @@
     if (data.markers) {
       data.markers = 'color:blue|' + data.center
     }
-
-    var width = data.width
-    var height = data.height
     var location = data.center || data.q
 
     if (type === 'iframe') {
