@@ -5,7 +5,7 @@ Embed a static map into the content.
 ## Installation
 
 * `bower|npm` `install https://github.com/BrandExtract/tinymce-plugin-map.git --save`
-* Move to a folder under `tinymce/plugins` through build scripts.
+* Move to a folder named "map" under `tinymce/plugins` through build scripts.
 
 ## Configuration
 
