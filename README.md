@@ -1,6 +1,6 @@
 # Map plugin for TinyMCE 4
 
-Embed a static map into the content.
+Embed a map into the content.
 
 ## Installation
 
@@ -22,7 +22,7 @@ tinymce.init({
 
 ## Development
 
-### TL;DR
+### The short version
 
 ```bash
 git clone https://github.com/BrandExtract/tinymce-plugin-map.git
@@ -32,7 +32,7 @@ npm install
 
 Edit the file, add and commit.
 
-### Why not edit the file directly on GitHub
+### Longer version, or why not edit the file directly on GitHub
 
 There is a `pre-commit` hook that is automatically installed after
 `npm install` and generates the minified file and sourcemap. Therefore,

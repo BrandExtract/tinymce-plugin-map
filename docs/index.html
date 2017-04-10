@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>TinyMCE Map plugin</title>
+</head>
+<body>
+
+  <div class="page-container">
+    <main>
+      <h1>TinyMCE Map plugin</h1>
+      <p>Embed a map into the content.</p>
+      <textarea>
+        <h3>Contact Us</h3>
+        <p>
+          <img
+            title="BrandExtract" alt="Map of BrandExtract" width="400" height="300"
+            src="//maps.googleapis.com/maps/api/staticmap?center=BrandExtract&amp;zoom=14&amp;markers=color:blue|BrandExtract&amp;width=400&amp;height=300&amp;scale=2&amp;maptype=roadmap&amp;format=jpg&amp;size=400x300"
+          />
+        </p>
+        <p>&nbsp;</p>
+      </textarea>
+    </main>
+  </div>
+
+  <script src="./scripts/tinymce/tinymce.min.js"></script>
+
+  <script>
+    tinymce.init({
+      selector: 'textarea',
+      height: 500,
+      plugins: [
+        'code image map media',
+      ],
+      toolbar: 'image map media',
+      extended_valid_elements: "+iframe[src|width|height|name|align|class]"
+    });
+  </script>
+</body>
+</html>
