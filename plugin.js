@@ -14,6 +14,7 @@
     api: '//www.google.com/maps/embed/v1/place?',
     type: 'iframe'
   }
+  var MARKER_REGEX = /^(?:color:)?([^|]*)(?:\|.*)?$/
 
   function buildURL (url, params) {
     var key
@@ -78,7 +79,7 @@
     }
 
     if (data.markers) {
-      data.markers = 'color:blue|' + data.center
+      data.markers = data.markers.replace(MARKER_REGEX, 'color:$1|' + data.center)
     }
     var location = data.center || data.q
 
@@ -180,11 +181,17 @@
           },
           {
             name: 'markers',
-            type: 'checkbox',
-            text: 'Marker',
-            required: true,
+            type: 'listbox',
+            subtype: 'text',
+            label: 'Marker',
             ariaLabel: 'Marker',
-            onchange: render
+            required: true,
+            values: ['No marker', 'black', 'brown', 'green', 'purple', 'yellow', 'blue', 'gray', 'orange', 'red', 'white'].map(function (color, index) {
+              var value = index === 0 ? '' : color
+              return { text: color, value: value }
+            }),
+            flex: 1,
+            onselect: render
           }
         ]
       },
@@ -345,6 +352,10 @@
           params.service = name
         }
       })
+
+      if (params.markers) {
+        params.markers = params.markers.replace(MARKER_REGEX, '$1')
+      }
 
       params.width = dom.getAttrib(mapElement, 'width')
       params.height = dom.getAttrib(mapElement, 'height')
