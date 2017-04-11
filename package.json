@@ -1,5 +1,5 @@
 {
-  "name": "tinymce-plugin-map",
+  "name": "@brandextract/tinymce-plugin-map",
   "version": "0.3.0",
   "description": "A TinyMCE plugin to insert a map",
   "main": "plugin.js",

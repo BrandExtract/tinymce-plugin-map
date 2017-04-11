@@ -4,7 +4,7 @@ Embed a map into the content.
 
 ## Installation
 
-* `bower|npm` `install https://github.com/BrandExtract/tinymce-plugin-map.git --save`
+* `npm install @brandextract/tinymce-plugin-map` or `bower install tinymce-plugin-map`
 * Move to a folder named "map" under `tinymce/plugins` through build scripts.
 
 ## Configuration
