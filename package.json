@@ -5,11 +5,13 @@
   "main": "plugin.js",
   "scripts": {
     "build": "node_modules/.bin/uglifyjs --compress properties,dead_code --mangle --output plugin.min.js --source-map plugin.js.map plugin.js",
-    "git": "git add plugin.js.map plugin.min.js",
+    "docs": "cp -r plugin.js.map plugin.min.js img langs docs/scripts/tinymce/plugins/map",
+    "git": "git add -u",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "pre-commit": [
     "build",
+    "docs",
     "git"
   ],
   "repository": {
