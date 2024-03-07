@@ -30,42 +30,6 @@
     return url;
   }
 
-  // parseUri 1.2.2
-  // (c) Steven Levithan <stevenlevithan.com>
-  // MIT License
-  function parseUri(str) {
-    const o = parseUri.options;
-    const m = o.parser[o.strictMode ? "strict" : "loose"].exec(str);
-    let uri = {};
-    let i = 14;
-
-    while (i--) {
-      uri[o.key[i]] = m[i] || "";
-    }
-
-    uri[o.q.name] = {};
-    uri[o.key[12]].replace(o.q.parser, function parse($0, $1, $2) {
-      if ($1) {
-        uri[o.q.name][$1] = $2;
-      }
-    });
-
-    return uri;
-  }
-
-  parseUri.options = {
-    strictMode: false,
-    key: ["source", "protocol", "authority", "userInfo", "user", "password", "host", "port", "relative", "path", "directory", "file", "query", "anchor"],
-    q: {
-      name: "queryKey",
-      parser: /(?:^|&)([^&=]*)=?([^&]*)/g
-    },
-    parser: {
-      strict: /^(?:([^:\/?#]+):)?(?:\/\/((?:(([^:@]*)(?::([^:@]*))?)?@)?([^:\/?#]*)(?::(\d*))?))?((((?:[^?#\/]*\/)*)([^?#]*))(?:\?([^#]*))?(?:#(.*))?)/,
-      loose: /^(?:(?![^:@]+:[^:@\/]*@)([^:\/?#.]+):)?(?:\/\/)?((?:(([^:@]*)(?::([^:@]*))?)?@)?([^:\/?#]*)(?::(\d*))?)(((\/(?:[^?#](?![^?#\/]*\.[^?#\/.]+(?:[?#]|$)))*\/?)?([^?#\/]*))(?:\?([^#]*))?(?:#(.*))?)/
-    }
-  };
-
   function buildMap(data, useInlineStyle) {
     const service = SERVICES[data.service || "google_staticmap"];
     if (!service) {
@@ -276,10 +240,16 @@
       if (!src) {
         src = dom.getAttrib(mapElement, "data-mce-p-src");
       }
-      const uri = parseUri(src);
-      if (uri.queryKey) {
-        params = uri.queryKey;
+      if (src.indexOf("//") === 0) {
+        src = "https:" + src;
       }
+      const srcURL = new URL(src);
+      const searchParams = new URLSearchParams(srcURL.search);
+
+      for (const [key, value] of searchParams) {
+        params[key] = value;
+      }
+
       if (params.retina === "true") {
         params.retina = true;
       } else {
@@ -386,7 +356,7 @@
     mapCtrl.innerHTML = html;
 
     return html;
-  }
+  };
 
   // Register plugin
   tinymce.PluginManager.add("map", (editor, url) => {
