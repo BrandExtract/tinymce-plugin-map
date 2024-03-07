@@ -1,17 +1,18 @@
 {
   "name": "@brandextract/tinymce-plugin-map",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "A TinyMCE plugin to insert a map",
   "main": "plugin.js",
   "scripts": {
-    "build": "node_modules/.bin/uglifyjs --compress properties,dead_code --mangle --output plugin.min.js --source-map plugin.js.map plugin.js",
-    "docs": "cp -r plugin.js.map plugin.min.js img langs docs/scripts/tinymce/plugins/map",
+    "build": "esbuild plugin.js --target=es6 --minify --bundle --allow-overwrite --sourcemap --outfile=plugin.min.js",
+    "dev": "npm run build;npm run tinymce;npm run docs;",
+    "tinymce": "cp -r node_modules/tinymce docs/scripts",
+    "docs": "mkdir -p docs/scripts/plugins/map && cp -r plugin.min.js.map plugin.min.js docs/scripts/plugins/map",
     "git": "git add -u",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "pre-commit": [
     "build",
-    "docs",
     "git"
   ],
   "repository": {
@@ -30,9 +31,9 @@
     "url": "https://github.com/BrandExtract/tinymce-plugin-map/issues"
   },
   "homepage": "https://github.com/BrandExtract/tinymce-plugin-map#readme",
-  "dependencies": {},
   "devDependencies": {
+    "esbuild": "^0.19.11",
     "pre-commit": "^1.2.2",
-    "uglify-js": "^2.7.5"
+    "tinymce": "^6.8.2"
   }
 }
