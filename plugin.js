@@ -243,11 +243,13 @@
       if (src.indexOf("//") === 0) {
         src = "https:" + src;
       }
-      const srcURL = new URL(src);
-      const searchParams = new URLSearchParams(srcURL.search);
+      if (src.indexOf("http") === 0) {
+        const srcURL = new URL(src);
+        const searchParams = new URLSearchParams(srcURL.search);
 
-      for (const [key, value] of searchParams) {
-        params[key] = value;
+        for (const [key, value] of searchParams) {
+          params[key] = value;
+        }
       }
 
       if (params.retina === "true") {
