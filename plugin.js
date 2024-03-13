@@ -1,8 +1,6 @@
 (function mapPlugin(tinymce) {
   "use strict";
 
-  tinymce.PluginManager.requireLangPack("map");
-
   const SERVICES = ["google_staticmap", "google_embed"];
   SERVICES["google_staticmap"] = {
     name: "Google Static Map",
